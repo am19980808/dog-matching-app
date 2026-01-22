@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dog, Home, Users, Clock, Volume2, Droplets, Heart, AlertCircle, Briefcase, Baby, Activity } from 'lucide-react';
+import { Dog, Home, Users, Clock, Volume2, Droplets, Heart, AlertCircle, Briefcase } from 'lucide-react';
 import { DollarSign, TrendingUp, Calendar, PiggyBank } from 'lucide-react';
 
 // 病気・怪我の詳細説明データベース
@@ -1255,8 +1255,8 @@ const App: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [recommendations, setRecommendations] = useState<DogRecommendation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [useAI, setUseAI] = useState(false);
+  const [, setIsLoading] = useState(false);
+  const [useAI] = useState(false);
   const [openBreedLink, setOpenBreedLink] = useState<number | null>(null);
 
   const questions: Question[] = [
