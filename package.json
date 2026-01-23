@@ -4,7 +4,7 @@
   "description": "犬の飼育適性診断アプリ",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
