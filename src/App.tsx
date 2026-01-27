@@ -1258,6 +1258,8 @@ const App: React.FC = () => {
   const [, setIsLoading] = useState(false);
   const [useAI] = useState(false);
   const [openBreedLink, setOpenBreedLink] = useState<number | null>(null);
+  const [showAllBreeds, setShowAllBreeds] = useState(false);
+  const [selectedBreedForDetail, setSelectedBreedForDetail] = useState<string | null>(null);
 
   const questions: Question[] = [
     {
@@ -2037,6 +2039,13 @@ ${dogList}
               >
                 もう一度診断する
               </button>
+
+              <button
+                onClick={() => setShowAllBreeds(true)}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors block mx-auto"
+              >
+                他の犬種の診断結果を見る
+              </button>
             </div>
 
             {/* 費用についての注意事項 */}
@@ -2058,6 +2067,157 @@ ${dogList}
                 環境省 動物愛護管理 | 日本獣医師会 | ジャパンケネルクラブ（JKC）
               </p>
             </div>
+            {/* 全犬種一覧モーダル */}
+{showAllBreeds && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">その他診断対象犬種の診断結果</h2>
+        <button
+          onClick={() => {
+            setShowAllBreeds(false);
+            setSelectedBreedForDetail(null);
+          }}
+          className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+        >
+          ✕
+        </button>
+      </div>
+      
+      {!selectedBreedForDetail ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {dogDatabase.map((dog) => {
+            const score = calculateDetailedScores(answers, dog);
+            const totalScore = Math.round(
+              (score.housing + score.exercise + score.grooming + score.experience + score.health) / 5
+            );
+            
+            return (
+              <button
+                key={dog.name}
+                onClick={() => setSelectedBreedForDetail(dog.name)}
+                className="p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:shadow-lg transition-all text-left"
+              >
+                <div className="font-semibold text-gray-800 mb-2">{dog.name}</div>
+                <div className="text-sm text-gray-600 mb-1">適性度</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="h-full rounded-full bg-indigo-600 transition-all"
+                      style={{ width: `${totalScore}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-indigo-600">{totalScore}%</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div>
+          <button
+            onClick={() => setSelectedBreedForDetail(null)}
+            className="mb-4 text-indigo-600 hover:text-indigo-800 font-semibold"
+          >
+            ← 一覧に戻る
+          </button>
+          
+          {(() => {
+            const breed = dogDatabase.find(d => d.name === selectedBreedForDetail);
+            if (!breed) return null;
+            
+            const scores = calculateDetailedScores(answers, breed);
+            const totalScore = Math.round(
+              (scores.housing + scores.exercise + scores.grooming + scores.experience + scores.health) / 5
+            );
+            
+            return (
+              <div className="space-y-4">
+                <div className="border-b pb-4">
+                  <h3 className="text-2xl font-bold text-indigo-600 mb-2">{breed.name}</h3>
+                  <p className="text-gray-700">{breed.characteristics}</p>
+                </div>
+                
+                <div className="bg-indigo-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-semibold text-gray-700">総合適性度</span>
+                    <span className="text-2xl font-bold text-indigo-600">{totalScore}%</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>🏠 住環境の相性</span>
+                        <span className="font-semibold">{scores.housing}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-full rounded-full bg-blue-500" style={{ width: `${scores.housing}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>🏃 運動・活動量の相性</span>
+                        <span className="font-semibold">{scores.exercise}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-full rounded-full bg-green-500" style={{ width: `${scores.exercise}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>✂️ お手入れ・ケアの相性</span>
+                        <span className="font-semibold">{scores.grooming}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-full rounded-full bg-purple-500" style={{ width: `${scores.grooming}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>🏆 経験・飼いやすさの相性</span>
+                        <span className="font-semibold">{scores.experience}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-full rounded-full bg-orange-500" style={{ width: `${scores.experience}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>❤️ 健康管理・コストの相性</span>
+                        <span className="font-semibold">{scores.health}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="h-full rounded-full bg-red-500" style={{ width: `${scores.health}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">📝 詳細</h4>
+                  <p className="text-gray-700">{breed.description}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">⚠️ 注意点</h4>
+                  <p className="text-gray-700">{breed.cautions}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">🏥 かかりやすい病気</h4>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {breed.commonDiseases.map((disease, idx) => (
+                      <li key={idx}>{disease}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+    </div>
+  </div>
+)}
           </div>
         </div >
       </div >
